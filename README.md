@@ -98,7 +98,6 @@ The skill description is intentionally strict — it fires **only on explicit HT
 - "create an HTML report / explainer / deck / dashboard / one-pager"
 - "save it as `.html`"
 - "I want a single-file HTML page for …"
-- Russian: "сделай HTML-отчёт", "одностраничный HTML", "сохрани как `.html`"
 
 **Anti-triggers (stays markdown):**
 
@@ -113,13 +112,13 @@ Before publishing, the skill was tested with 7 parallel subagent scenarios:
 
 | Scenario | Expected | Got |
 |---|---|---|
-| 1. RU "HTML-отчёт о статусе" | html + status-report | ✓ |
-| 2. EN "HTML slide deck" | html + slide-deck | ✓ |
-| 3. RU "post-mortem в .html" | html + incident-report | ✓ |
-| 4. RU "сохрани в MEMORY.md" | markdown, no skill | ✓ |
-| 5. RU "commit message" | plain text, no skill | ✓ |
-| 6. RU "краткий отчёт" (no HTML kw) | markdown, no skill | ✓ (agent cited skill rule) |
-| 7. RU "красивый отчёт с интерактивностью" (no HTML kw) | gray zone | agent chose HTML, defensible — "interactivity only HTML supports" |
+| 1. "HTML status report" | html + status-report | ✓ |
+| 2. "HTML slide deck" | html + slide-deck | ✓ |
+| 3. "post-mortem as `.html`" | html + incident-report | ✓ |
+| 4. "save to MEMORY.md" | markdown, no skill | ✓ |
+| 5. "commit message" | plain text, no skill | ✓ |
+| 6. "brief report" (no HTML keyword) | markdown, no skill | ✓ (agent cited skill rule) |
+| 7. "pretty report with cards / charts / interactivity" (no HTML keyword) | gray zone | agent chose HTML, defensible — "interactivity only HTML supports" |
 
 Compliance audit of 4 HTML outputs:
 

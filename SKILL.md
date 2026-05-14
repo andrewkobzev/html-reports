@@ -15,7 +15,6 @@ Author production-quality, **single-file HTML artifacts** — reports, explainer
 - "create an HTML report / explainer / deck / dashboard / one-pager / slide deck"
 - "save it as `.html`"
 - "I want a single-file HTML page for …"
-- "одностраничный HTML", "в HTML", "сохрани как `.html`"
 
 **Do NOT trigger when the user asks to:**
 

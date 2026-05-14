@@ -12,7 +12,6 @@ This document tells the agent **when** to author single-file HTML artifacts (rep
 - "create an HTML report / explainer / deck / dashboard / one-pager"
 - "save it as `.html`"
 - "I want a single-file HTML page for …"
-- Russian: "сделай HTML-отчёт", "одностраничный HTML", "сохрани как `.html`"
 
 **Stay markdown / plain text (do NOT switch to HTML) when:**
 
