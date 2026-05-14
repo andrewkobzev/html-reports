@@ -146,6 +146,22 @@ This repo is **public**. Any `.html` you push to it (including under `reports/`)
 - **Cloudflare Pages** with Cloudflare Access.
 - Or just keep them local and share via screenshot / file attachment.
 
+## Related work
+
+Before building this, I looked for an existing package that combined all of:
+
+- a strict trigger (HTML only on explicit request — no surprises),
+- a locked design system (warm-earth palette + dark-mode toggle baked in),
+- ready-to-adapt HTML templates (not just category descriptions),
+- a multi-target installer (Claude Code + Codex CLI + Gemini CLI + project-level),
+- live previews via GitHub Pages.
+
+Didn't find one with all five, so this repo exists. Closely related projects worth knowing:
+
+- **[ThariqS/html-effectiveness](https://github.com/ThariqS/html-effectiveness)** — Thariq's own repo. The 20 worked examples + manifesto that started this whole thing. Not a packaged skill: no `SKILL.md`, no installer. Source of the palette and typography rules used here.
+- **[anthropics/skills/web-artifacts-builder](https://github.com/anthropics/skills/tree/main/skills/web-artifacts-builder)** — Anthropic's official skill, but for a different use case: complex multi-component React / TypeScript / shadcn/ui artifacts (Tailwind 3.4.1, 40+ shadcn components). Bundles to a single file at the end, but the development model is heavyweight. Use it when you need application-class artifacts, not single-page reports.
+- **[dogum/html-artifacts](https://github.com/dogum/html-artifacts)** — community skill that operationalises Thariq's nine categories. Closest philosophical sibling to this repo. Different design choices worth considering: triggers more aggressively (activates on "doc", "spec", "mockup", "compare", "explain" even without an explicit HTML keyword), no locked palette ("tasteful by default" rather than prescribed), per-category reference docs instead of HTML templates, supports Claude.ai's `.skill` upload format. Worth a look if you prefer less-strict triggering and more stylistic flexibility.
+
 ## Provenance
 
 - [thariqs.github.io/html-effectiveness](https://thariqs.github.io/html-effectiveness/) — companion site to the original thread, 20 worked examples across 9 categories.
