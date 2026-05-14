@@ -1,0 +1,338 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How X works — feature explainer</title>
+<script>
+  (function () {
+    var saved = null;
+    try { saved = localStorage.getItem('html-doc-theme'); } catch (e) {}
+    var prefers = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    document.documentElement.setAttribute('data-theme', saved || (prefers ? 'dark' : 'light'));
+  })();
+</script>
+<style>
+  :root {
+    --ivory:#FAF9F5; --paper:#FFFFFF; --slate:#141413;
+    --clay:#D97757; --clay-d:#B85C3E; --oat:#E3DACC;
+    --olive:#788C5D; --rust:#B04A3F;
+    --g100:#F0EEE6; --g300:#D1CFC5; --g500:#87867F; --g700:#3D3D3A;
+    --serif: ui-serif, Georgia, serif;
+    --sans:  system-ui, -apple-system, sans-serif;
+    --mono:  ui-monospace, 'SF Mono', Menlo, monospace;
+    --border: 1.5px solid var(--g300);
+  }
+  [data-theme="dark"] {
+    --ivory:  #1A1917;
+    --paper:  #232220;
+    --slate:  #FAF9F5;
+    --clay:   #E08A6D;
+    --clay-d: #D97757;
+    --oat:    #3A3329;
+    --olive:  #92A878;
+    --rust:   #C4604F;
+    --g100:   #2A2826;
+    --g200:   #302E2C;
+    --g300:   #393937;
+    --g500:   #87867F;
+    --g700:   #D1CFC5;
+  }
+
+  .theme-toggle {
+    position: fixed; top: 18px; right: 18px;
+    width: 36px; height: 36px;
+    padding: 0;
+    border-radius: 999px;
+    background: var(--paper);
+    border: 1.5px solid var(--g300);
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    z-index: 100;
+    transition: border-color 150ms, transform 150ms;
+  }
+  .theme-toggle:hover { border-color: var(--slate); transform: scale(1.05); }
+  .theme-toggle svg { width: 18px; height: 18px; stroke: var(--g700); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .theme-toggle .icon-moon { display: none; }
+  [data-theme="dark"] .theme-toggle .icon-sun  { display: none; }
+  [data-theme="dark"] .theme-toggle .icon-moon { display: inline-block; }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 56px 24px 120px;
+    background: var(--ivory); color: var(--g700);
+    font-family: var(--sans); font-size: 15px; line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+  .page { max-width: 1080px; margin: 0 auto; }
+
+  /* Layout — main + glossary sidebar */
+  .layout {
+    display: grid;
+    grid-template-columns: 1fr 260px;
+    gap: 56px;
+    align-items: start;
+  }
+  @media (max-width: 920px) { .layout { grid-template-columns: 1fr; } }
+
+  /* Header */
+  header { margin-bottom: 40px; }
+  .eyebrow {
+    font-family: var(--mono); font-size: 12px;
+    letter-spacing: 0.12em; text-transform: uppercase; color: var(--g500);
+    margin-bottom: 14px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .eyebrow::before { content: ""; width: 24px; height: 1.5px; background: var(--clay); }
+  h1 {
+    font-family: var(--serif); font-weight: 500;
+    font-size: clamp(34px, 5vw, 48px); letter-spacing: -0.015em;
+    color: var(--slate); margin: 0 0 12px;
+  }
+  h1 em { font-style: italic; color: var(--clay); }
+
+  /* TL;DR box */
+  .tldr {
+    background: var(--oat); border: 1.5px solid var(--clay-d);
+    border-radius: 12px; padding: 18px 22px; margin-bottom: 36px;
+  }
+  .tldr .label {
+    font-family: var(--mono); font-size: 11px;
+    text-transform: uppercase; letter-spacing: 0.1em;
+    color: var(--clay-d); margin-bottom: 6px;
+  }
+  .tldr p { margin: 0; color: var(--slate); font-size: 15.5px; }
+
+  /* Sections */
+  section { margin-bottom: 48px; }
+  h2 {
+    font-family: var(--serif); font-weight: 500; font-size: 26px;
+    letter-spacing: -0.012em; color: var(--slate); margin: 0 0 6px;
+  }
+  h3 {
+    font-family: var(--serif); font-weight: 500; font-size: 19px;
+    color: var(--slate); margin: 24px 0 6px;
+  }
+  hr.rule { border: none; border-top: 1px solid var(--g300); margin: 0 0 20px; }
+  p { margin: 0 0 12px; }
+  a { color: var(--clay); text-decoration-color: var(--oat); text-underline-offset: 3px; }
+  a:hover { text-decoration-color: var(--clay); }
+
+  /* Collapsible step */
+  details {
+    background: var(--paper); border: var(--border);
+    border-radius: 10px; padding: 14px 18px; margin-bottom: 10px;
+  }
+  details[open] { background: var(--paper); border-color: var(--g500); }
+  summary {
+    cursor: pointer; list-style: none;
+    display: flex; align-items: center; gap: 12px;
+    color: var(--slate); font-weight: 500;
+  }
+  summary::-webkit-details-marker { display: none; }
+  summary::before {
+    content: "▸"; color: var(--clay); transition: transform 150ms;
+    display: inline-block;
+  }
+  details[open] summary::before { transform: rotate(90deg); }
+  .step-num {
+    font-family: var(--mono); font-size: 12px;
+    background: var(--g100); color: var(--g500);
+    padding: 2px 8px; border-radius: 999px;
+    border: var(--border);
+  }
+  .details-body { padding-top: 12px; margin-top: 12px; border-top: 1px solid var(--g300); }
+  .details-body pre {
+    font-family: var(--mono); font-size: 13px; line-height: 1.5;
+    background: var(--g100); border: var(--border); border-radius: 6px;
+    padding: 12px 14px; overflow-x: auto;
+  }
+
+  /* Tabs for code samples */
+  .tabs {
+    background: var(--paper); border: var(--border);
+    border-radius: 10px; overflow: hidden; margin: 10px 0 16px;
+  }
+  .tab-row {
+    display: flex; gap: 4px; padding: 6px 6px 0;
+    background: var(--g100); border-bottom: var(--border);
+  }
+  .tab-btn {
+    font-family: var(--mono); font-size: 12px;
+    background: transparent; border: none; cursor: pointer;
+    padding: 8px 14px; border-radius: 6px 6px 0 0;
+    color: var(--g500);
+  }
+  .tab-btn[aria-selected="true"] {
+    background: var(--paper); color: var(--slate);
+  }
+  .tab-panel {
+    display: none; padding: 16px 18px;
+  }
+  .tab-panel[data-active] { display: block; }
+  .tab-panel pre {
+    font-family: var(--mono); font-size: 13px; line-height: 1.5;
+    margin: 0; overflow-x: auto;
+  }
+
+  /* Glossary sidebar */
+  aside.glossary {
+    position: sticky; top: 32px;
+    background: var(--paper); border: var(--border);
+    border-radius: 12px; padding: 18px 20px;
+  }
+  aside.glossary h3 {
+    font-family: var(--mono); font-size: 11px;
+    text-transform: uppercase; letter-spacing: 0.1em;
+    color: var(--g500); margin: 0 0 12px;
+  }
+  aside.glossary dl { margin: 0; }
+  aside.glossary dt {
+    font-weight: 500; color: var(--slate); margin-top: 12px; font-size: 14px;
+  }
+  aside.glossary dt:first-child { margin-top: 0; }
+  aside.glossary dd {
+    margin: 2px 0 0; font-size: 13.5px; color: var(--g700); line-height: 1.5;
+  }
+
+  /* FAQ */
+  .faq details { background: var(--g100); }
+</style>
+</head>
+<body>
+<button class="theme-toggle" aria-label="Toggle dark mode" title="Toggle dark mode" onclick="var d=document.documentElement,c=d.getAttribute('data-theme'),n=c==='dark'?'light':'dark';d.setAttribute('data-theme',n);try{localStorage.setItem('html-doc-theme',n)}catch(e){}">
+  <svg class="icon-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="2" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="22" y2="12"/><line x1="4.93" y1="4.93" x2="7.05" y2="7.05"/><line x1="16.95" y1="16.95" x2="19.07" y2="19.07"/><line x1="4.93" y1="19.07" x2="7.05" y2="16.95"/><line x1="16.95" y1="7.05" x2="19.07" y2="4.93"/></svg>
+  <svg class="icon-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+</button>
+<div class="page">
+
+  <div class="layout">
+
+    <main>
+      <header>
+        <div class="eyebrow">Feature explainer</div>
+        <h1>How <em>rate limiting</em> works in this repo</h1>
+        <div class="tldr">
+          <div class="label">TL;DR</div>
+          <p>Two-layer scheme. Per-IP token bucket at the edge (Nginx) for raw flood protection, then per-account sliding window inside the Node app for business-tier quotas. Configurable via env vars, not code.</p>
+        </div>
+      </header>
+
+      <section>
+        <h2>The request path</h2>
+        <hr class="rule">
+
+        <details open>
+          <summary><span class="step-num">01</span> Nginx receives the request</summary>
+          <div class="details-body">
+            <p>The first check is in the Nginx upstream block — token bucket keyed on <code>$binary_remote_addr</code>, sized for ~30 rps burst per IP.</p>
+            <pre>limit_req_zone $binary_remote_addr zone=oe_edge:10m rate=30r/s;
+location /orderentry/ {
+  limit_req zone=oe_edge burst=20 nodelay;
+  proxy_pass http://oe-backend;
+}</pre>
+          </div>
+        </details>
+
+        <details>
+          <summary><span class="step-num">02</span> Backend receives, validates JWT, attaches account</summary>
+          <div class="details-body">
+            <p>Auth middleware reads <code>x-iisnode-auth_user</code> (or Easy Auth header), looks up the account, attaches it to <code>req.user</code>. Rate limiter reads <code>req.user.accountId</code> next.</p>
+          </div>
+        </details>
+
+        <details>
+          <summary><span class="step-num">03</span> Per-account sliding-window check</summary>
+          <div class="details-body">
+            <p>In-memory Map keyed on <code>accountId</code>, sliding window of 60s. Default cap is 600 req/min/account. Hot accounts get override via <code>RATE_OVERRIDES</code> env JSON.</p>
+            <pre>RATE_OVERRIDES='{"CU101-0000000001": 3000}'</pre>
+          </div>
+        </details>
+
+        <details>
+          <summary><span class="step-num">04</span> Response — 429 with Retry-After</summary>
+          <div class="details-body">
+            <p>On hit, returns <code>429 Too Many Requests</code> with <code>Retry-After</code> header set to seconds until window slides. Frontend swallows + retries silently up to 3 times.</p>
+          </div>
+        </details>
+      </section>
+
+      <section>
+        <h2>Configuration</h2>
+        <hr class="rule">
+        <div class="tabs">
+          <div class="tab-row" role="tablist">
+            <button class="tab-btn" role="tab" aria-selected="true" data-tab="env">.env</button>
+            <button class="tab-btn" role="tab" data-tab="web">web.config</button>
+            <button class="tab-btn" role="tab" data-tab="azure">Azure env vars</button>
+          </div>
+          <div class="tab-panel" data-tab="env" data-active><pre>RATE_LIMIT_PER_MIN=600
+RATE_OVERRIDES='{"CU101-...":3000}'
+RATE_LIMIT_WINDOW_MS=60000</pre></div>
+          <div class="tab-panel" data-tab="web"><pre>&lt;add key="RATE_LIMIT_PER_MIN" value="600" /&gt;
+&lt;add key="RATE_OVERRIDES" value='{"CU101-...":3000}' /&gt;</pre></div>
+          <div class="tab-panel" data-tab="azure"><pre>az containerapp update \
+  --name containerapp-oe-backend-sandbox \
+  --set-env-vars RATE_LIMIT_PER_MIN=600</pre></div>
+        </div>
+      </section>
+
+      <section class="faq">
+        <h2>FAQ</h2>
+        <hr class="rule">
+        <details>
+          <summary>What if I need to bypass the limit for an integration test?</summary>
+          <div class="details-body">
+            <p>Add the test client IP to <code>RATE_BYPASS_IPS</code> in <code>.env</code>. Bypass is logged at <code>info</code> level so audit still sees the calls.</p>
+          </div>
+        </details>
+        <details>
+          <summary>Why in-memory and not Redis?</summary>
+          <div class="details-body">
+            <p>Single-instance Node app today. When we go multi-instance on Container Apps, the limiter is the first thing to swap for Redis. Tracked in <a href="#">BW-4220</a>.</p>
+          </div>
+        </details>
+        <details>
+          <summary>Does this apply to MCP tool calls?</summary>
+          <div class="details-body">
+            <p>No — MCP has its own API-key-based gate, lives outside this path. See <code>mcp-server/README.md</code>.</p>
+          </div>
+        </details>
+      </section>
+    </main>
+
+    <aside class="glossary">
+      <h3>Glossary</h3>
+      <dl>
+        <dt>Token bucket</dt>
+        <dd>Algorithm where each request consumes a token; tokens refill at a fixed rate. Allows short bursts.</dd>
+        <dt>Sliding window</dt>
+        <dd>Counts requests in the last N seconds, recomputed continuously. Smoother than fixed windows.</dd>
+        <dt>Burst</dt>
+        <dd>Maximum requests allowed above the steady rate before the limiter kicks in.</dd>
+        <dt>Retry-After</dt>
+        <dd>HTTP header the server returns with a 429, telling the client how many seconds to wait.</dd>
+      </dl>
+    </aside>
+
+  </div>
+
+</div>
+
+<script>
+  // Tabs
+  document.querySelectorAll('.tabs').forEach(tabs => {
+    const btns = tabs.querySelectorAll('.tab-btn');
+    const panels = tabs.querySelectorAll('.tab-panel');
+    btns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        btns.forEach(b => b.setAttribute('aria-selected', 'false'));
+        btn.setAttribute('aria-selected', 'true');
+        const id = btn.dataset.tab;
+        panels.forEach(p => p.toggleAttribute('data-active', p.dataset.tab === id));
+      });
+    });
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,288 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>html-reports — live previews</title>
+<script>
+  (function () {
+    var saved = null;
+    try { saved = localStorage.getItem('html-doc-theme'); } catch (e) {}
+    var prefers = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    document.documentElement.setAttribute('data-theme', saved || (prefers ? 'dark' : 'light'));
+  })();
+</script>
+<style>
+  :root {
+    --ivory:  #FAF9F5;
+    --paper:  #FFFFFF;
+    --slate:  #141413;
+    --clay:   #D97757;
+    --clay-d: #B85C3E;
+    --oat:    #E3DACC;
+    --olive:  #788C5D;
+    --rust:   #B04A3F;
+    --g100:   #F0EEE6;
+    --g200:   #E6E3DA;
+    --g300:   #D1CFC5;
+    --g500:   #87867F;
+    --g700:   #3D3D3A;
+    --serif: ui-serif, Georgia, "Times New Roman", Times, serif;
+    --sans:  system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --mono:  ui-monospace, "SF Mono", Menlo, Monaco, Consolas, monospace;
+    --border: 1.5px solid var(--g300);
+  }
+
+  [data-theme="dark"] {
+    --ivory:  #1A1917;
+    --paper:  #232220;
+    --slate:  #FAF9F5;
+    --clay:   #E08A6D;
+    --clay-d: #D97757;
+    --oat:    #3A3329;
+    --olive:  #92A878;
+    --rust:   #C4604F;
+    --g100:   #2A2826;
+    --g200:   #302E2C;
+    --g300:   #393937;
+    --g500:   #87867F;
+    --g700:   #D1CFC5;
+  }
+
+  .theme-toggle {
+    position: fixed; top: 18px; right: 18px;
+    width: 36px; height: 36px;
+    padding: 0;
+    border-radius: 999px;
+    background: var(--paper);
+    border: 1.5px solid var(--g300);
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    z-index: 100;
+    transition: border-color 150ms, transform 150ms;
+  }
+  .theme-toggle:hover { border-color: var(--slate); transform: scale(1.05); }
+  .theme-toggle svg { width: 18px; height: 18px; stroke: var(--g700); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .theme-toggle .icon-moon { display: none; }
+  [data-theme="dark"] .theme-toggle .icon-sun  { display: none; }
+  [data-theme="dark"] .theme-toggle .icon-moon { display: inline-block; }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    padding: 64px 28px 120px;
+    background: var(--ivory);
+    color: var(--g700);
+    font-family: var(--sans);
+    font-size: 15px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  .page { max-width: 980px; margin: 0 auto; }
+
+  header { margin-bottom: 56px; }
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--g500);
+    margin-bottom: 16px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .eyebrow::before { content: ""; width: 24px; height: 1.5px; background: var(--clay); }
+  h1 {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: clamp(38px, 5.4vw, 56px);
+    line-height: 1.06;
+    letter-spacing: -0.018em;
+    color: var(--slate);
+    margin: 0 0 14px;
+    max-width: 18ch;
+  }
+  h1 em { font-style: italic; color: var(--clay); }
+  .lede {
+    font-size: 16.5px;
+    color: var(--g700);
+    max-width: 620px;
+    margin: 0;
+  }
+  .lede a { color: var(--clay); text-decoration-color: var(--oat); text-underline-offset: 3px; }
+  .lede a:hover { text-decoration-color: var(--clay); }
+
+  a { color: var(--clay); text-decoration-color: var(--oat); text-underline-offset: 3px; }
+  a:hover { text-decoration-color: var(--clay); }
+
+  section { margin-top: 56px; }
+  h2 {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 24px;
+    letter-spacing: -0.012em;
+    color: var(--slate);
+    margin: 0 0 6px;
+  }
+  hr.rule { border: none; border-top: 1px solid var(--g300); margin: 0 0 22px; }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 18px;
+  }
+  a.card {
+    display: flex; flex-direction: column;
+    background: var(--paper);
+    border: var(--border);
+    border-radius: 12px;
+    padding: 20px 22px 16px;
+    text-decoration: none;
+    color: inherit;
+    transition: transform 150ms ease, box-shadow 150ms ease, border-color 150ms ease;
+  }
+  a.card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px rgba(20, 20, 19, 0.10);
+    border-color: var(--slate);
+  }
+  .card-meta {
+    font-family: var(--mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--g500);
+    margin-bottom: 8px;
+  }
+  .card-title {
+    font-family: var(--serif);
+    font-size: 19px;
+    font-weight: 500;
+    color: var(--slate);
+    margin: 0 0 6px;
+    letter-spacing: -0.008em;
+  }
+  .card-desc {
+    font-size: 13.5px;
+    color: var(--g700);
+    line-height: 1.5;
+    margin: 0;
+    flex: 1;
+  }
+  .card-link {
+    margin-top: 14px;
+    padding-top: 11px;
+    border-top: 1px solid var(--g100);
+    font-family: var(--mono);
+    font-size: 11.5px;
+    color: var(--clay);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .card-link .arr { transition: transform 150ms ease; }
+  a.card:hover .card-link .arr { transform: translateX(3px); }
+
+  footer {
+    margin-top: 80px;
+    padding-top: 20px;
+    border-top: 1px solid var(--g300);
+    font-size: 12.5px;
+    color: var(--g500);
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  footer .k { font-family: var(--serif); font-style: italic; color: var(--g700); font-size: 14px; }
+</style>
+</head>
+<body>
+
+<button class="theme-toggle" aria-label="Toggle dark mode" title="Toggle dark mode" onclick="var d=document.documentElement,c=d.getAttribute('data-theme'),n=c==='dark'?'light':'dark';d.setAttribute('data-theme',n);try{localStorage.setItem('html-doc-theme',n)}catch(e){}">
+  <svg class="icon-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="2" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="22" y2="12"/><line x1="4.93" y1="4.93" x2="7.05" y2="7.05"/><line x1="16.95" y1="16.95" x2="19.07" y2="19.07"/><line x1="4.93" y1="19.07" x2="7.05" y2="16.95"/><line x1="16.95" y1="7.05" x2="19.07" y2="4.93"/></svg>
+  <svg class="icon-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+</button>
+
+<div class="page">
+
+  <header>
+    <div class="eyebrow">html-reports — live previews</div>
+    <h1>Single-file <em>HTML</em> reports, rendered.</h1>
+    <p class="lede">
+      Live previews of the six templates from the <a href="https://gist.github.com/andrewkobzev/85331eec1b4e8adfecf32076e3dee8c0">html-document skill</a>.
+      Each renders exactly the way an artifact generated by the skill would. Click any card to open the rendered HTML;
+      use the ☀ / ☾ button in the top-right to toggle dark mode (preference persists in <code>localStorage</code>).
+    </p>
+  </header>
+
+  <section>
+    <h2>Templates</h2>
+    <hr class="rule">
+    <div class="grid">
+
+      <a class="card" href="status-report.html">
+        <div class="card-meta">Weekly / monthly</div>
+        <div class="card-title">Status report</div>
+        <p class="card-desc">KPI cards, shipped / at-risk / blocked rows, bar chart of throughput, focus list.</p>
+        <div class="card-link"><span>status-report.html</span><span class="arr">→</span></div>
+      </a>
+
+      <a class="card" href="incident-report.html">
+        <div class="card-meta">Post-mortem</div>
+        <div class="card-title">Incident report</div>
+        <p class="card-desc">Severity pills, minute-by-minute vertical timeline, five whys, action items checklist.</p>
+        <div class="card-link"><span>incident-report.html</span><span class="arr">→</span></div>
+      </a>
+
+      <a class="card" href="plan.html">
+        <div class="card-meta">Roadmap</div>
+        <div class="card-title">Implementation plan</div>
+        <p class="card-desc">Milestones on a timeline, inline SVG data-flow diagram, risk register with severity badges.</p>
+        <div class="card-link"><span>plan.html</span><span class="arr">→</span></div>
+      </a>
+
+      <a class="card" href="explainer.html">
+        <div class="card-meta">How-it-works</div>
+        <div class="card-title">Feature explainer</div>
+        <p class="card-desc">Collapsible request-path steps, tabbed config samples, sticky glossary sidebar, FAQ.</p>
+        <div class="card-link"><span>explainer.html</span><span class="arr">→</span></div>
+      </a>
+
+      <a class="card" href="slide-deck.html">
+        <div class="card-meta">Presentation</div>
+        <div class="card-title">Slide deck</div>
+        <p class="card-desc">Arrow-key / space / click navigable. Big stats, two-column compares, progress dots.</p>
+        <div class="card-link"><span>slide-deck.html</span><span class="arr">→</span></div>
+      </a>
+
+      <a class="card" href="base.html">
+        <div class="card-meta">Foundation</div>
+        <div class="card-title">Base template</div>
+        <p class="card-desc">Clean canvas with the full design tokens and a tiny example layout. Start here for "everything else".</p>
+        <div class="card-link"><span>base.html</span><span class="arr">→</span></div>
+      </a>
+
+    </div>
+  </section>
+
+  <section>
+    <h2>Why this exists</h2>
+    <hr class="rule">
+    <p>
+      Based on <a href="https://thariqs.github.io/html-effectiveness/">Thariq Shihipar's "The unreasonable effectiveness of HTML"</a> (Anthropic, May 2026).
+      The <a href="https://gist.github.com/andrewkobzev/85331eec1b4e8adfecf32076e3dee8c0">html-document gist</a> packages the
+      idea into a reusable Claude Code / Codex CLI / Gemini CLI skill plus a frontmatter-less universal-prompt drop-in for everything else.
+    </p>
+    <p>
+      To publish your own rendered reports: clone this repo, drop new <code>.html</code> files into it, push, done — they go live at
+      <code>https://andrewkobzev.github.io/html-reports/&lt;name&gt;.html</code>.
+    </p>
+  </section>
+
+  <footer>
+    <span><span class="k">html-reports</span> · public · <a href="https://github.com/andrewkobzev/html-reports">source</a></span>
+    <span>Andrew Ko · 2026</span>
+  </footer>
+
+</div>
+</body>
+</html>

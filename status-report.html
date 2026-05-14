@@ -1,0 +1,318 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Status Report — Week NN</title>
+<script>
+  (function () {
+    var saved = null;
+    try { saved = localStorage.getItem('html-doc-theme'); } catch (e) {}
+    var prefers = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    document.documentElement.setAttribute('data-theme', saved || (prefers ? 'dark' : 'light'));
+  })();
+</script>
+<style>
+  :root {
+    --ivory:#FAF9F5; --paper:#FFFFFF; --slate:#141413;
+    --clay:#D97757; --clay-d:#B85C3E; --oat:#E3DACC;
+    --olive:#788C5D; --rust:#B04A3F;
+    --g100:#F0EEE6; --g200:#E6E3DA; --g300:#D1CFC5;
+    --g500:#87867F; --g700:#3D3D3A;
+    --serif: ui-serif, Georgia, serif;
+    --sans:  system-ui, -apple-system, sans-serif;
+    --mono:  ui-monospace, 'SF Mono', Menlo, monospace;
+    --border: 1.5px solid var(--g300);
+  }
+  [data-theme="dark"] {
+    --ivory:  #1A1917;
+    --paper:  #232220;
+    --slate:  #FAF9F5;
+    --clay:   #E08A6D;
+    --clay-d: #D97757;
+    --oat:    #3A3329;
+    --olive:  #92A878;
+    --rust:   #C4604F;
+    --g100:   #2A2826;
+    --g200:   #302E2C;
+    --g300:   #393937;
+    --g500:   #87867F;
+    --g700:   #D1CFC5;
+  }
+
+  .theme-toggle {
+    position: fixed; top: 18px; right: 18px;
+    width: 36px; height: 36px;
+    padding: 0;
+    border-radius: 999px;
+    background: var(--paper);
+    border: 1.5px solid var(--g300);
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    z-index: 100;
+    transition: border-color 150ms, transform 150ms;
+  }
+  .theme-toggle:hover { border-color: var(--slate); transform: scale(1.05); }
+  .theme-toggle svg { width: 18px; height: 18px; stroke: var(--g700); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .theme-toggle .icon-moon { display: none; }
+  [data-theme="dark"] .theme-toggle .icon-sun  { display: none; }
+  [data-theme="dark"] .theme-toggle .icon-moon { display: inline-block; }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 56px 24px 120px;
+    background: var(--ivory); color: var(--g700);
+    font-family: var(--sans); font-size: 15px; line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  .page { max-width: 880px; margin: 0 auto; }
+
+  /* Header */
+  header { margin-bottom: 44px; }
+  .header-top {
+    display: flex; align-items: baseline; justify-content: space-between;
+    flex-wrap: wrap; gap: 12px; margin-bottom: 8px;
+  }
+  h1 {
+    font-family: var(--serif); font-weight: 500;
+    font-size: clamp(34px, 5vw, 46px); letter-spacing: -0.015em;
+    color: var(--slate); margin: 0;
+  }
+  h1 em { font-style: italic; color: var(--clay); }
+  .meta-pill {
+    font-family: var(--mono); font-size: 11px; text-transform: uppercase;
+    letter-spacing: 0.08em; color: var(--g500); background: var(--g100);
+    border: var(--border); border-radius: 999px; padding: 5px 11px;
+  }
+  .date-range { color: var(--g500); font-size: 14px; }
+  .date-range .repo { font-family: var(--mono); font-size: 13px; color: var(--g700); }
+
+  /* Sections */
+  section { margin-bottom: 52px; }
+  h2 {
+    font-family: var(--serif); font-weight: 500; font-size: 24px;
+    letter-spacing: -0.012em; color: var(--slate); margin: 0 0 6px;
+  }
+  hr.rule { border: none; border-top: 1px solid var(--g300); margin: 0 0 22px; }
+  a { color: var(--clay); text-decoration-color: var(--oat); text-underline-offset: 3px; }
+  a:hover { text-decoration-color: var(--clay); }
+
+  /* Summary KPI band */
+  .summary-band {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px;
+  }
+  @media (max-width: 720px) { .summary-band { grid-template-columns: repeat(2, 1fr); } }
+  .stat-card {
+    background: var(--paper); border: var(--border);
+    border-radius: 12px; padding: 18px 20px 16px;
+  }
+  .stat-label {
+    font-family: var(--mono); font-size: 11px; text-transform: uppercase;
+    letter-spacing: 0.08em; color: var(--g500); margin-bottom: 8px;
+  }
+  .stat-value {
+    font-family: var(--serif); font-size: 30px; font-weight: 500;
+    color: var(--slate); letter-spacing: -0.01em; line-height: 1;
+  }
+  .stat-delta {
+    font-family: var(--mono); font-size: 11.5px; margin-top: 6px;
+  }
+  .delta-up   { color: var(--olive); }
+  .delta-down { color: var(--rust); }
+  .delta-flat { color: var(--g500); }
+
+  /* Item rows */
+  .item-list { list-style: none; margin: 0; padding: 0; }
+  .item-row {
+    display: flex; align-items: flex-start; gap: 14px;
+    padding: 14px 16px;
+    background: var(--paper); border: var(--border);
+    border-radius: 10px; margin-bottom: 8px;
+  }
+  .item-pill {
+    flex-shrink: 0; font-family: var(--mono); font-size: 10.5px;
+    text-transform: uppercase; letter-spacing: 0.08em;
+    padding: 4px 9px; border-radius: 999px; white-space: nowrap;
+    margin-top: 1px;
+  }
+  .pill-ship  { background: var(--olive); color: #FFFFFF; }
+  .pill-risk  { background: var(--oat); color: var(--clay-d); }
+  .pill-block { background: var(--rust); color: #FFFFFF; }
+  .pill-todo  { background: var(--g100); color: var(--g700); border: var(--border); }
+
+  .item-body { flex: 1; min-width: 0; }
+  .item-title { font-weight: 500; color: var(--slate); margin-bottom: 2px; }
+  .item-meta {
+    font-family: var(--mono); font-size: 11.5px; color: var(--g500);
+  }
+  .item-meta .owner { color: var(--g700); }
+
+  /* Two-column section */
+  .two-col {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 24px;
+  }
+  @media (max-width: 720px) { .two-col { grid-template-columns: 1fr; } }
+
+  /* Chart */
+  .chart-wrap {
+    background: var(--paper); border: var(--border);
+    border-radius: 12px; padding: 22px;
+  }
+  .chart-title {
+    font-family: var(--serif); font-size: 17px; color: var(--slate);
+    margin: 0 0 14px;
+  }
+  .chart-bars { display: flex; align-items: flex-end; gap: 14px; height: 140px; }
+  .chart-bar { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  .chart-bar .b {
+    width: 100%; border-radius: 4px 4px 0 0;
+    background: var(--g300);
+  }
+  .chart-bar.shipped .b { background: var(--olive); }
+  .chart-bar.this    .b { background: var(--clay); }
+  .chart-bar .label {
+    font-family: var(--mono); font-size: 10.5px; text-transform: uppercase;
+    color: var(--g500); letter-spacing: 0.06em;
+  }
+  .chart-bar .value {
+    font-family: var(--mono); font-size: 11px; color: var(--g700);
+  }
+
+  /* Footer */
+  footer {
+    margin-top: 60px; padding-top: 20px;
+    border-top: 1px solid var(--g300);
+    font-size: 12.5px; color: var(--g500);
+    display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px;
+  }
+  footer .k { font-family: var(--serif); font-style: italic; color: var(--g700); }
+</style>
+</head>
+<body>
+<button class="theme-toggle" aria-label="Toggle dark mode" title="Toggle dark mode" onclick="var d=document.documentElement,c=d.getAttribute('data-theme'),n=c==='dark'?'light':'dark';d.setAttribute('data-theme',n);try{localStorage.setItem('html-doc-theme',n)}catch(e){}">
+  <svg class="icon-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="2" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="22" y2="12"/><line x1="4.93" y1="4.93" x2="7.05" y2="7.05"/><line x1="16.95" y1="16.95" x2="19.07" y2="19.07"/><line x1="4.93" y1="19.07" x2="7.05" y2="16.95"/><line x1="16.95" y1="7.05" x2="19.07" y2="4.93"/></svg>
+  <svg class="icon-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+</button>
+<div class="page">
+
+  <header>
+    <div class="header-top">
+      <h1>Engineering <em>status</em> — Week 11</h1>
+      <span class="meta-pill">Auto-drafted</span>
+    </div>
+    <div class="date-range">Mar 10 – Mar 16, 2026 · <span class="repo">acme/platform</span></div>
+  </header>
+
+  <section>
+    <h2>The week at a glance</h2>
+    <hr class="rule">
+    <div class="summary-band">
+      <div class="stat-card">
+        <div class="stat-label">Shipped</div>
+        <div class="stat-value">7</div>
+        <div class="stat-delta delta-up">▲ 2 vs prev</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">In flight</div>
+        <div class="stat-value">12</div>
+        <div class="stat-delta delta-flat">— same</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">At risk</div>
+        <div class="stat-value">3</div>
+        <div class="stat-delta delta-down">▼ 1 vs prev</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">P0 incidents</div>
+        <div class="stat-value">0</div>
+        <div class="stat-delta delta-flat">— clean week</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>What shipped</h2>
+    <hr class="rule">
+    <ul class="item-list">
+      <li class="item-row">
+        <span class="item-pill pill-ship">Shipped</span>
+        <div class="item-body">
+          <div class="item-title">Cart edit lock UI — concurrent-edit indicator</div>
+          <div class="item-meta">PR <a href="#">#3182</a> · <span class="owner">Andrew K.</span> · Merged Mar 13</div>
+        </div>
+      </li>
+      <li class="item-row">
+        <span class="item-pill pill-ship">Shipped</span>
+        <div class="item-body">
+          <div class="item-title">Voicemail-to-order Whisper pipeline (sandbox)</div>
+          <div class="item-meta">PR <a href="#">#3190</a> · <span class="owner">James M.</span> · Merged Mar 15</div>
+        </div>
+      </li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>At risk / slipped</h2>
+    <hr class="rule">
+    <ul class="item-list">
+      <li class="item-row">
+        <span class="item-pill pill-risk">At risk</span>
+        <div class="item-body">
+          <div class="item-title">PostgreSQL NSG rule for AI agent VNet egress</div>
+          <div class="item-meta">Blocked on Network team · ETA Mon · <span class="owner">James M.</span></div>
+        </div>
+      </li>
+      <li class="item-row">
+        <span class="item-pill pill-block">Blocked</span>
+        <div class="item-body">
+          <div class="item-title">Anthropic model availability on AI Foundry</div>
+          <div class="item-meta">Vendor side · no ETA · workaround: route via Anthropic API direct</div>
+        </div>
+      </li>
+    </ul>
+  </section>
+
+  <section class="two-col">
+    <div>
+      <h2>Throughput</h2>
+      <hr class="rule">
+      <div class="chart-wrap">
+        <div class="chart-title">Merged PRs by week</div>
+        <div class="chart-bars">
+          <div class="chart-bar shipped"><div class="b" style="height: 50%"></div><div class="value">5</div><div class="label">W08</div></div>
+          <div class="chart-bar shipped"><div class="b" style="height: 70%"></div><div class="value">7</div><div class="label">W09</div></div>
+          <div class="chart-bar shipped"><div class="b" style="height: 50%"></div><div class="value">5</div><div class="label">W10</div></div>
+          <div class="chart-bar this"><div class="b" style="height: 70%"></div><div class="value">7</div><div class="label">W11</div></div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <h2>Focus next week</h2>
+      <hr class="rule">
+      <ul class="item-list">
+        <li class="item-row">
+          <span class="item-pill pill-todo">Plan</span>
+          <div class="item-body">
+            <div class="item-title">Production rollout — Phase 2 (custom domain + Easy Auth)</div>
+            <div class="item-meta">Lead: <span class="owner">Andrew K.</span></div>
+          </div>
+        </li>
+        <li class="item-row">
+          <span class="item-pill pill-todo">Plan</span>
+          <div class="item-body">
+            <div class="item-title">Vue 3 migration spike</div>
+            <div class="item-meta">Lead: <span class="owner">Yury P.</span></div>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <footer>
+    <span><span class="k">Drafted</span> Mon · last updated 09:42</span>
+    <span>questions → #eng-status on Slack</span>
+  </footer>
+
+</div>
+</body>
+</html>

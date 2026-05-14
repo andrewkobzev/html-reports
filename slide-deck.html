@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Slide deck — replace title</title>
+<script>
+  (function () {
+    var saved = null;
+    try { saved = localStorage.getItem('html-doc-theme'); } catch (e) {}
+    var prefers = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    document.documentElement.setAttribute('data-theme', saved || (prefers ? 'dark' : 'light'));
+  })();
+</script>
+<style>
+  :root {
+    --ivory:#FAF9F5; --paper:#FFFFFF; --slate:#141413;
+    --clay:#D97757; --clay-d:#B85C3E; --oat:#E3DACC;
+    --olive:#788C5D; --rust:#B04A3F;
+    --g100:#F0EEE6; --g300:#D1CFC5; --g500:#87867F; --g700:#3D3D3A;
+    --serif: ui-serif, Georgia, serif;
+    --sans:  system-ui, -apple-system, sans-serif;
+    --mono:  ui-monospace, 'SF Mono', Menlo, monospace;
+  }
+  [data-theme="dark"] {
+    --ivory:  #1A1917;
+    --paper:  #232220;
+    --slate:  #FAF9F5;
+    --clay:   #E08A6D;
+    --clay-d: #D97757;
+    --oat:    #3A3329;
+    --olive:  #92A878;
+    --rust:   #C4604F;
+    --g100:   #2A2826;
+    --g200:   #302E2C;
+    --g300:   #393937;
+    --g500:   #87867F;
+    --g700:   #D1CFC5;
+  }
+
+  .theme-toggle {
+    position: fixed; top: 18px; right: 18px;
+    width: 36px; height: 36px;
+    padding: 0;
+    border-radius: 999px;
+    background: var(--paper);
+    border: 1.5px solid var(--g300);
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    z-index: 100;
+    transition: border-color 150ms, transform 150ms;
+  }
+  .theme-toggle:hover { border-color: var(--slate); transform: scale(1.05); }
+  .theme-toggle svg { width: 18px; height: 18px; stroke: var(--g700); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .theme-toggle .icon-moon { display: none; }
+  [data-theme="dark"] .theme-toggle .icon-sun  { display: none; }
+  [data-theme="dark"] .theme-toggle .icon-moon { display: inline-block; }
+
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0; background: var(--ivory); color: var(--g700);
+    font-family: var(--sans); -webkit-font-smoothing: antialiased;
+    overflow: hidden;
+  }
+
+  /* Deck — one slide visible at a time */
+  .deck { position: relative; width: 100vw; height: 100vh; }
+  section.slide {
+    position: absolute; inset: 0;
+    padding: clamp(40px, 7vw, 96px);
+    display: flex; flex-direction: column; justify-content: center;
+    max-width: 1200px; margin: 0 auto;
+    opacity: 0; pointer-events: none;
+    transition: opacity 220ms ease;
+  }
+  section.slide[data-active] { opacity: 1; pointer-events: auto; }
+
+  /* Slide chrome */
+  .eyebrow {
+    font-family: var(--mono); font-size: 12.5px;
+    text-transform: uppercase; letter-spacing: 0.14em;
+    color: var(--g500);
+    margin-bottom: 22px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .eyebrow::before { content: ""; width: 26px; height: 1.5px; background: var(--clay); }
+  h1, h2 {
+    font-family: var(--serif); font-weight: 500;
+    color: var(--slate); margin: 0 0 14px;
+    letter-spacing: -0.015em;
+  }
+  h1 { font-size: clamp(48px, 7vw, 88px); line-height: 1.04; }
+  h1 em { font-style: italic; color: var(--clay); }
+  h2 { font-size: clamp(34px, 4.5vw, 52px); line-height: 1.1; }
+  p.lede { font-size: clamp(20px, 2vw, 26px); color: var(--g700); max-width: 28ch; margin: 0 0 24px; line-height: 1.4; }
+  p.body { font-size: 19px; color: var(--g700); max-width: 60ch; }
+
+  /* Quote slide */
+  .quote {
+    font-family: var(--serif); font-style: italic;
+    font-size: clamp(28px, 3.6vw, 48px);
+    color: var(--slate); max-width: 22ch;
+    line-height: 1.18; margin: 0 0 24px;
+  }
+  .quote-attr {
+    font-family: var(--mono); font-size: 13px;
+    text-transform: uppercase; letter-spacing: 0.1em; color: var(--g500);
+  }
+
+  /* Stat slide */
+  .big-stat {
+    font-family: var(--serif); font-weight: 500;
+    font-size: clamp(96px, 16vw, 220px);
+    color: var(--clay); line-height: 0.95; margin: 0 0 12px;
+    letter-spacing: -0.03em;
+  }
+  .big-stat-caption {
+    font-size: clamp(18px, 2vw, 24px); color: var(--g700);
+    max-width: 28ch;
+  }
+
+  /* Bullet slide */
+  ul.bullets {
+    list-style: none; margin: 0; padding: 0;
+    font-size: clamp(18px, 2vw, 24px);
+  }
+  ul.bullets li {
+    padding: 12px 0;
+    display: flex; gap: 18px; align-items: flex-start;
+    border-top: 1px solid var(--g300);
+  }
+  ul.bullets li:first-child { border-top: none; }
+  ul.bullets .n {
+    font-family: var(--mono); font-size: 14px;
+    color: var(--clay); padding-top: 8px;
+    width: 32px; flex-shrink: 0;
+  }
+  ul.bullets li b { color: var(--slate); font-weight: 500; }
+
+  /* Two-column */
+  .two-col {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: clamp(32px, 5vw, 80px); align-items: center;
+  }
+  @media (max-width: 720px) { .two-col { grid-template-columns: 1fr; } }
+  .col-card {
+    background: var(--paper);
+    border: 1.5px solid var(--g300); border-radius: 14px;
+    padding: 28px 30px;
+  }
+  .col-card h3 {
+    font-family: var(--serif); font-size: 26px; font-weight: 500;
+    color: var(--slate); margin: 0 0 10px;
+  }
+
+  /* Footer / progress */
+  .deck-foot {
+    position: fixed; bottom: 24px; left: 0; right: 0;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 0 28px;
+    font-family: var(--mono); font-size: 11.5px;
+    text-transform: uppercase; letter-spacing: 0.08em; color: var(--g500);
+    pointer-events: none;
+  }
+  .dots { display: flex; gap: 6px; }
+  .dots .d {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--g300); transition: background 150ms;
+  }
+  .dots .d.on { background: var(--clay); }
+
+  .nav-hint { color: var(--g500); }
+  .nav-hint kbd {
+    font-family: var(--mono); font-size: 11px;
+    background: var(--paper); border: 1.5px solid var(--g300);
+    border-radius: 4px; padding: 2px 6px; margin: 0 2px;
+    color: var(--g700);
+  }
+</style>
+</head>
+<body>
+
+<button class="theme-toggle" aria-label="Toggle dark mode" title="Toggle dark mode" onclick="var d=document.documentElement,c=d.getAttribute('data-theme'),n=c==='dark'?'light':'dark';d.setAttribute('data-theme',n);try{localStorage.setItem('html-doc-theme',n)}catch(e){}">
+  <svg class="icon-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="2" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="22" y2="12"/><line x1="4.93" y1="4.93" x2="7.05" y2="7.05"/><line x1="16.95" y1="16.95" x2="19.07" y2="19.07"/><line x1="4.93" y1="19.07" x2="7.05" y2="16.95"/><line x1="16.95" y1="7.05" x2="19.07" y2="4.93"/></svg>
+  <svg class="icon-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+</button>
+
+<div class="deck" id="deck">
+
+  <!-- Slide 1 — Title -->
+  <section class="slide" data-active>
+    <div class="eyebrow">All-hands · March 18</div>
+    <h1>The <em>unreasonable</em> effectiveness of HTML</h1>
+    <p class="lede">Why we're switching from markdown to HTML for agent-generated artifacts.</p>
+  </section>
+
+  <!-- Slide 2 — Quote / setup -->
+  <section class="slide">
+    <div class="eyebrow">The premise</div>
+    <p class="quote">"Markdown flattens spatial information. HTML restores it."</p>
+    <p class="quote-attr">Thariq Shihipar · Anthropic · May 2026</p>
+  </section>
+
+  <!-- Slide 3 — Big stat -->
+  <section class="slide">
+    <div class="eyebrow">Side-by-side benchmark</div>
+    <div class="big-stat">17/20</div>
+    <p class="big-stat-caption">HTML won 17 of 20 head-to-head comparisons against markdown for the same agent output. The three losses were tasks that never get read by a human.</p>
+  </section>
+
+  <!-- Slide 4 — Bullets -->
+  <section class="slide">
+    <div class="eyebrow">Where HTML wins</div>
+    <h2>Nine kinds of work.</h2>
+    <ul class="bullets">
+      <li><span class="n">01</span><div><b>Exploration & planning</b> — fan out options side-by-side, pick one, then plan it.</div></li>
+      <li><span class="n">02</span><div><b>Code review</b> — annotated diffs, module maps, the PR writeup reviewers want.</div></li>
+      <li><span class="n">03</span><div><b>Reports</b> — status updates and post-mortems that get read, not skimmed.</div></li>
+      <li><span class="n">04</span><div><b>Explainers</b> — collapsible steps, tabbed snippets, glossary in the margin.</div></li>
+      <li><span class="n">05</span><div><b>Custom editors</b> — throwaway UIs for the exact thing you're working on, always with an export button.</div></li>
+    </ul>
+  </section>
+
+  <!-- Slide 5 — Two-column -->
+  <section class="slide">
+    <div class="eyebrow">What changes for us</div>
+    <h2>Default still markdown — HTML on request.</h2>
+    <div class="two-col">
+      <div class="col-card">
+        <h3>Stays markdown</h3>
+        <p class="body">Memory files, CLAUDE.md, plans-of-record, commit messages, PR descriptions, Slack/Telegram replies.</p>
+      </div>
+      <div class="col-card">
+        <h3>Becomes HTML</h3>
+        <p class="body">Status reports, incident write-ups, explainers, slide decks, dashboards, anything spatial.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 6 — Close -->
+  <section class="slide">
+    <div class="eyebrow">In short</div>
+    <h2>One <em>file</em>. No build step. <br>You stay in the loop.</h2>
+    <p class="body">The artifact is a `.html` you open in a browser. The agent generates it; you tweak it; the agent regenerates it. The loop gets tighter.</p>
+  </section>
+
+</div>
+
+<div class="deck-foot">
+  <span id="counter">01 / 06</span>
+  <div class="dots" id="dots"></div>
+  <span class="nav-hint">use <kbd>←</kbd> <kbd>→</kbd> · or <kbd>Space</kbd></span>
+</div>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  const dotsEl = document.getElementById('dots');
+  const counter = document.getElementById('counter');
+  let idx = 0;
+
+  slides.forEach((_, i) => {
+    const d = document.createElement('span');
+    d.className = 'd' + (i === 0 ? ' on' : '');
+    dotsEl.appendChild(d);
+  });
+  const dots = dotsEl.querySelectorAll('.d');
+
+  function show(i) {
+    idx = Math.max(0, Math.min(slides.length - 1, i));
+    slides.forEach((s, n) => s.toggleAttribute('data-active', n === idx));
+    dots.forEach((d, n) => d.classList.toggle('on', n === idx));
+    counter.textContent = String(idx + 1).padStart(2, '0') + ' / ' + String(slides.length).padStart(2, '0');
+  }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') { e.preventDefault(); show(idx + 1); }
+    else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); show(idx - 1); }
+    else if (e.key === 'Home') show(0);
+    else if (e.key === 'End') show(slides.length - 1);
+  });
+
+  // Click anywhere to advance
+  document.addEventListener('click', e => {
+    if (e.target.closest('a, button, kbd')) return;
+    show(idx + 1);
+  });
+</script>
+</body>
+</html>

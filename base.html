@@ -1,0 +1,315 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Untitled — replace this title</title>
+<script>
+  (function () {
+    var saved = null;
+    try { saved = localStorage.getItem('html-doc-theme'); } catch (e) {}
+    var prefers = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    document.documentElement.setAttribute('data-theme', saved || (prefers ? 'dark' : 'light'));
+  })();
+</script>
+<style>
+  :root {
+    --ivory:  #FAF9F5;
+    --paper:  #FFFFFF;
+    --slate:  #141413;
+    --clay:   #D97757;
+    --clay-d: #B85C3E;
+    --oat:    #E3DACC;
+    --olive:  #788C5D;
+    --rust:   #B04A3F;
+    --g100:   #F0EEE6;
+    --g200:   #E6E3DA;
+    --g300:   #D1CFC5;
+    --g500:   #87867F;
+    --g700:   #3D3D3A;
+
+    --serif: ui-serif, Georgia, "Times New Roman", Times, serif;
+    --sans:  system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --mono:  ui-monospace, "SF Mono", Menlo, Monaco, Consolas, monospace;
+
+    --radius-panel: 12px;
+    --radius-pill:  999px;
+    --border: 1.5px solid var(--g300);
+  }
+
+  [data-theme="dark"] {
+    --ivory:  #1A1917;
+    --paper:  #232220;
+    --slate:  #FAF9F5;
+    --clay:   #E08A6D;
+    --clay-d: #D97757;
+    --oat:    #3A3329;
+    --olive:  #92A878;
+    --rust:   #C4604F;
+    --g100:   #2A2826;
+    --g200:   #302E2C;
+    --g300:   #393937;
+    --g500:   #87867F;
+    --g700:   #D1CFC5;
+  }
+
+  .theme-toggle {
+    position: fixed; top: 18px; right: 18px;
+    width: 36px; height: 36px;
+    padding: 0;
+    border-radius: 999px;
+    background: var(--paper);
+    border: 1.5px solid var(--g300);
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    z-index: 100;
+    transition: border-color 150ms, transform 150ms;
+  }
+  .theme-toggle:hover { border-color: var(--slate); transform: scale(1.05); }
+  .theme-toggle svg { width: 18px; height: 18px; stroke: var(--g700); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .theme-toggle .icon-moon { display: none; }
+  [data-theme="dark"] .theme-toggle .icon-sun  { display: none; }
+  [data-theme="dark"] .theme-toggle .icon-moon { display: inline-block; }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    padding: 56px 24px 120px;
+    background: var(--ivory);
+    color: var(--g700);
+    font-family: var(--sans);
+    font-size: 15px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  .page { max-width: 860px; margin: 0 auto; }
+
+  /* ── Header ── */
+  header { margin-bottom: 40px; }
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--g500);
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .eyebrow::before {
+    content: "";
+    width: 24px; height: 1.5px;
+    background: var(--clay);
+  }
+  h1 {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: clamp(34px, 5.4vw, 52px);
+    line-height: 1.06;
+    letter-spacing: -0.015em;
+    color: var(--slate);
+    margin: 0 0 10px;
+  }
+  h1 em { font-style: italic; color: var(--clay); }
+  .subtitle {
+    font-size: 16px;
+    color: var(--g500);
+    margin: 0;
+    max-width: 620px;
+  }
+
+  /* ── Sections ── */
+  section { margin-bottom: 56px; }
+  h2 {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 26px;
+    letter-spacing: -0.012em;
+    color: var(--slate);
+    margin: 0 0 4px;
+  }
+  h3 {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 19px;
+    color: var(--slate);
+    margin: 0 0 6px;
+  }
+  hr.rule {
+    border: none;
+    border-top: 1px solid var(--g300);
+    margin: 6px 0 22px;
+  }
+  p { margin: 0 0 12px; }
+  a { color: var(--clay); text-decoration-color: var(--oat); text-underline-offset: 3px; }
+  a:hover { text-decoration-color: var(--clay); }
+
+  /* ── Cards ── */
+  .card {
+    background: var(--paper);
+    border: var(--border);
+    border-radius: var(--radius-panel);
+    padding: 20px 22px;
+    margin-bottom: 14px;
+  }
+  .card-title {
+    font-family: var(--serif);
+    font-size: 18px;
+    font-weight: 500;
+    color: var(--slate);
+    margin: 0 0 6px;
+  }
+  .card-meta {
+    font-family: var(--mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--g500);
+  }
+
+  /* ── Grid ── */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 14px;
+  }
+
+  /* ── Pills / chips ── */
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 5px 11px;
+    border: var(--border);
+    border-radius: var(--radius-pill);
+    background: var(--paper);
+    color: var(--g700);
+    white-space: nowrap;
+  }
+  .pill.ok    { background: var(--olive); color: #FFFFFF; border-color: var(--olive); }
+  .pill.warn  { background: var(--oat); color: var(--clay-d); border-color: var(--oat); }
+  .pill.alert { background: var(--rust); color: #FFFFFF; border-color: var(--rust); }
+
+  /* ── Code blocks ── */
+  code {
+    font-family: var(--mono);
+    font-size: 13px;
+    background: var(--g100);
+    padding: 1px 6px;
+    border-radius: 4px;
+  }
+  pre {
+    font-family: var(--mono);
+    font-size: 13px;
+    line-height: 1.5;
+    background: var(--g100);
+    border: var(--border);
+    border-radius: var(--radius-panel);
+    padding: 16px 18px;
+    overflow-x: auto;
+    margin: 0 0 16px;
+  }
+  pre code { background: none; padding: 0; }
+
+  /* ── Inline SVG diagram classes (use on <rect>, <line>, <circle>, <path>) ── */
+  svg .cl { fill: var(--clay); }
+  svg .ol { fill: var(--olive); }
+  svg .oa { fill: var(--oat); stroke: var(--g500); stroke-width: 2; }
+  svg .sl { fill: var(--slate); }
+  svg .fl { fill: var(--g300); }
+  svg .wh { fill: var(--paper); stroke: var(--g500); stroke-width: 2; }
+  svg .ln { stroke: var(--g500); stroke-width: 2; fill: none; stroke-linecap: round; }
+  svg .lc { stroke: var(--clay); stroke-width: 2; fill: none; stroke-linecap: round; }
+  svg .da { stroke-dasharray: 4 4; }
+
+  /* ── Footer ── */
+  footer {
+    margin-top: 80px;
+    padding-top: 20px;
+    border-top: 1px solid var(--g300);
+    font-size: 12.5px;
+    color: var(--g500);
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  footer .k { font-family: var(--serif); font-style: italic; color: var(--g700); }
+
+  /* ── Mobile ── */
+  @media (max-width: 640px) {
+    body { padding: 36px 16px 80px; }
+    h1 { font-size: 32px; }
+    h2 { font-size: 22px; }
+  }
+</style>
+</head>
+<body>
+<button class="theme-toggle" aria-label="Toggle dark mode" title="Toggle dark mode" onclick="var d=document.documentElement,c=d.getAttribute('data-theme'),n=c==='dark'?'light':'dark';d.setAttribute('data-theme',n);try{localStorage.setItem('html-doc-theme',n)}catch(e){}">
+  <svg class="icon-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="2" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="22" y2="12"/><line x1="4.93" y1="4.93" x2="7.05" y2="7.05"/><line x1="16.95" y1="16.95" x2="19.07" y2="19.07"/><line x1="4.93" y1="19.07" x2="7.05" y2="16.95"/><line x1="16.95" y1="7.05" x2="19.07" y2="4.93"/></svg>
+  <svg class="icon-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+</button>
+<div class="page">
+
+  <header>
+    <div class="eyebrow">Type / category goes here</div>
+    <h1>Title with one <em>italic clay</em> word for emphasis</h1>
+    <p class="subtitle">One-line subtitle that explains what this document is for and who it's for. Keep it under ~120 characters.</p>
+  </header>
+
+  <section>
+    <h2>Section heading</h2>
+    <hr class="rule">
+    <p>Body paragraph. Use this for prose. Inline <code>code</code> and <a href="#">links</a> follow the palette.</p>
+
+    <div class="grid">
+      <div class="card">
+        <div class="card-meta">Label</div>
+        <div class="card-title">Card title</div>
+        <p>Card body text. Keep cards short — one idea each.</p>
+      </div>
+      <div class="card">
+        <div class="card-meta">Label</div>
+        <div class="card-title">Another card</div>
+        <p>Cards live in a responsive grid that collapses on mobile.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Pills for status</h2>
+    <hr class="rule">
+    <p>
+      <span class="pill ok">Shipped</span>
+      <span class="pill warn">At risk</span>
+      <span class="pill alert">Incident</span>
+      <span class="pill">Neutral</span>
+    </p>
+  </section>
+
+  <section>
+    <h2>Inline SVG diagram</h2>
+    <hr class="rule">
+    <svg viewBox="0 0 320 100" width="100%" style="max-width: 480px; height: auto;">
+      <rect class="wh" x="10" y="20" width="80" height="60" rx="8"/>
+      <rect class="oa" x="120" y="20" width="80" height="60" rx="8"/>
+      <rect class="cl" x="230" y="20" width="80" height="60" rx="8"/>
+      <line class="ln" x1="90" y1="50" x2="120" y2="50"/>
+      <line class="lc" x1="200" y1="50" x2="230" y2="50"/>
+    </svg>
+  </section>
+
+  <footer>
+    <span><span class="k">Drafted</span> by claude — replace with author / date / context as needed</span>
+    <span>v0.1</span>
+  </footer>
+
+</div>
+</body>
+</html>
